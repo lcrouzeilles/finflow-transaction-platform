@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: finflow-config
+data:
+  SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql:5432/finflow
+  SPRING_DATASOURCE_USERNAME: finflow
+  SPRING_DATA_REDIS_HOST: redis
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+  APP_KAFKA_TRANSFER_CREATED_TOPIC: transfer.created.v1
+  APP_KAFKA_TRANSFER_COMPLETED_TOPIC: transfer.completed.v1

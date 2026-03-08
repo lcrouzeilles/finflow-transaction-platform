@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: finflow-transaction-platform
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: finflow-transaction-platform
+  template:
+    metadata:
+      labels:
+        app: finflow-transaction-platform
+    spec:
+      containers:
+        - name: app
+          image: finflow/transaction-platform:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: finflow-config
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1024Mi"

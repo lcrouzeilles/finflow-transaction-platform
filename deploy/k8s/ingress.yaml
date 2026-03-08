@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: finflow-transaction-platform
+spec:
+  rules:
+    - host: finflow.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: finflow-transaction-platform
+                port:
+                  number: 80

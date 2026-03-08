@@ -1,0 +1,104 @@
+server:
+  port: 8080
+  shutdown: graceful
+
+spring:
+  application:
+    name: finflow-transaction-platform
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/finflow
+    username: finflow
+    password: finflow
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 2000
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+        format_sql: false
+  flyway:
+    enabled: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2s
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      acks: all
+      retries: 5
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        delivery.timeout.ms: 30000
+        linger.ms: 10
+        compression.type: zstd
+    consumer:
+      group-id: finflow-transaction-platform
+      auto-offset-reset: earliest
+      properties:
+        isolation.level: read_committed
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://example.invalid/issuer
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,env,configprops
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when_authorized
+  tracing:
+    sampling:
+      probability: 1.0
+
+logging:
+  pattern:
+    level: "%5p traceId=%X{traceId:-} spanId=%X{spanId:-}"
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+app:
+  kafka:
+    transfer-created-topic: transfer.created.v1
+    transfer-completed-topic: transfer.completed.v1
+  outbox:
+    poll-interval-ms: 3000
+  security:
+    jwt-secret: "01234567890123456789012345678901"
+    issuer: "finflow-local"
+resilience4j:
+  retry:
+    instances:
+      fraudService:
+        max-attempts: 3
+        wait-duration: 200ms
+  circuitbreaker:
+    instances:
+      fraudService:
+        sliding-window-size: 20
+        minimum-number-of-calls: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+  bulkhead:
+    instances:
+      fraudService:
+        max-concurrent-calls: 50
